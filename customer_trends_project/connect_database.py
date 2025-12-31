@@ -6,14 +6,11 @@ from tabulate import tabulate
 DB = r'C:\Users\bey77\OneDrive\Desktop\Projects\data_analysis\customer_trends_project\database.db'
 CSV = r'C:\Users\bey77\OneDrive\Desktop\Projects\data_analysis\customer_trends_project\customer_shopping_behavior.csv'
 
-# Connect to SQLite
 conn = sqlite3.connect(DB)
 cur = conn.cursor()
 
-# Drop table if it exists (for clean rebuild)
 cur.execute("DROP TABLE IF EXISTS customer;")
 
-# Create table with proper types
 cur.execute('''
 CREATE TABLE customer (
     customer_id TEXT,
@@ -38,17 +35,14 @@ CREATE TABLE customer (
 )
 ''')
 
-# Open CSV and normalize headers
 with open(CSV, 'r', newline='', encoding='utf-8-sig') as file:
     reader = csv.DictReader(file)
     reader.fieldnames = [h.strip().replace(" ", "_").replace("(", "").replace(")", "").lower() for h in reader.fieldnames]
 
     for row in reader:
-        # Clean text fields
         discount = row['discount_applied'].strip() if row['discount_applied'] else 'No'
         frequency = row['frequency_of_purchases'].strip() if row['frequency_of_purchases'] else None
 
-        # Map frequency to days
         freq_days_map = {
             'Weekly': 7,
             'Fortnightly': 14,
@@ -58,7 +52,6 @@ with open(CSV, 'r', newline='', encoding='utf-8-sig') as file:
         }
         purchase_freq_days = freq_days_map.get(frequency, None)
 
-        # Insert row into table
         cur.execute('''
             INSERT INTO customer (
                 customer_id, age, gender, item_purchased, category,
@@ -75,7 +68,6 @@ with open(CSV, 'r', newline='', encoding='utf-8-sig') as file:
             row['payment_method'], frequency, purchase_freq_days
         ))
 
-# Commit and close connection
 conn.commit()
 
 
@@ -207,6 +199,7 @@ conn.commit()
 
 
 conn.close()
+
 
 
 
